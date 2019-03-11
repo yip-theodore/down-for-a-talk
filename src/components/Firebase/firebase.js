@@ -19,8 +19,12 @@ class Firebase {
     this.db = app.database()
   }
 
-  user = uid => this.db.ref(`users/${uid}`)
+  createUser = () => this.auth.signInAnonymously()
 
+  onUserChange = callback =>
+    this.auth.onAuthStateChanged(authUser => callback(authUser))
+
+  user = uid => this.db.ref(`users/${uid}`)
   users = () => this.db.ref('users')
 }
 
