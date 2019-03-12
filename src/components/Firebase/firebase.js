@@ -14,20 +14,34 @@ const config = {
 class Firebase {
   constructor () {
     app.initializeApp(config)
-
     this.auth = app.auth()
     this.db = app.database()
   }
 
   createUser = () => this.auth.signInAnonymously()
 
-  onUserChange = callback =>
-    this.auth.onAuthStateChanged(authUser => callback(authUser))
+  joinWaitingRoom = () => {
+    this.userRef.set({ waiting: true })
+    this.waitingRef.push(true)
+  }
 
-  user = uid => this.db.ref(`users/${uid}`)
-  users = () => this.db.ref('users')
+  onUserChange = callback => {
+    this.auth.onAuthStateChanged(authUser => {
+      if (!authUser) return
 
-  waiting = uid => this.db.ref(`waiting/${uid}`)
+      this.userRef = this.db.ref(`users/${authUser.uid}`)
+      this.waitingRef = this.db.ref(`waiting/${authUser.uid}`)
+
+
+      this.userRef.on('value', snapshot => {
+        const userInfo = snapshot.val()
+
+        const user = { uid: authUser.uid, ...userInfo }
+        callback(user)
+      })
+    })
+  }
+
 }
 
 export default Firebase

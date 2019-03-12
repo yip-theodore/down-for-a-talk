@@ -5,17 +5,11 @@ import { withUserProvider, withUser } from '../User'
 
 class App extends Component {
 
-  join = () => {
+  join = async () => {
     const { firebase, user } = this.props
 
-    if (user) {
-      firebase.waiting(user.uid).set(true)
-    } else {
-      firebase.createUser()
-      .then(({ user }) =>
-        firebase.waiting(user.uid).set(true)
-      )
-    }
+    if (!user.uid) await firebase.createUser()
+    firebase.joinWaitingRoom()
   }
 
   render() {
@@ -23,7 +17,15 @@ class App extends Component {
     return (
       <div>
         <pre>{JSON.stringify(user, null, 2)}</pre>
-        <button onClick={this.join}>Join</button>
+
+        {user.conversationId
+          ? <h2>Chat</h2>
+          : user.waiting
+            ? <span>Looking for someone…</span>
+            : <button onClick={this.join}>
+                {user.uid ? 'Enter' : 'Join'}
+              </button>
+        }
       </div>
     );
   }
