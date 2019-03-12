@@ -6,9 +6,16 @@ import { withUserProvider, withUser } from '../User'
 class App extends Component {
 
   join = () => {
-    const { firebase } = this.props
+    const { firebase, user } = this.props
 
-    firebase.createUser()
+    if (user) {
+      firebase.waiting(user.uid).set(true)
+    } else {
+      firebase.createUser()
+      .then(({ user }) =>
+        firebase.waiting(user.uid).set(true)
+      )
+    }
   }
 
   render() {

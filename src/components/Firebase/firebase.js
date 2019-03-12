@@ -26,6 +26,8 @@ class Firebase {
 
   user = uid => this.db.ref(`users/${uid}`)
   users = () => this.db.ref('users')
+
+  waiting = uid => this.db.ref(`waiting/${uid}`)
 }
 
 export default Firebase
