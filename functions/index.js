@@ -23,14 +23,19 @@ exports.matchmaker =
       const conversationRef = ref.root.child('conversations').push()
       const users = [ matchedUid, uid ]
 
-      const setConversation = conversationRef.set({ users })
+      const setConversation = users.map(userId =>
+        conversationRef.child(`users/${userId}`)
+        .set({
+          left: false,
+          typing: false
+        }))
       const updateUsers = users.map(userId =>
         ref.root.child(`users/${userId}`)
         .update({
           conversationId: conversationRef.key,
           waiting: false
         }))
-      return Promise.all([setConversation, ...updateUsers])
+      return Promise.all([...setConversation, ...updateUsers])
     })
 
     const leaveWaitingRoom = ref.remove()

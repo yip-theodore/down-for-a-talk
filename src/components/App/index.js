@@ -3,6 +3,8 @@ import { compose } from 'recompose'
 import { withFirebaseProvider } from '../Firebase'
 import { withUserProvider, withUser } from '../User'
 
+import Conversation from '../Conversation'
+
 class App extends Component {
 
   join = async () => {
@@ -19,7 +21,7 @@ class App extends Component {
         <pre>{JSON.stringify(user, null, 2)}</pre>
 
         {user.conversationId
-          ? <h2>Chat</h2>
+          ? <Conversation />
           : user.waiting
             ? <span>Looking for someone…</span>
             : <button onClick={this.join}>

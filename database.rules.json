@@ -1,0 +1,33 @@
+{
+  "rules": {
+    "waiting": {
+      "$uid": {
+        ".read": false,
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "match": {
+      ".read": false,
+      ".write": false
+    },
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "conversations": {
+      "$conversation_id": {
+        ".read": "data.child('users/'+auth.uid).exists()",
+        ".write": "data.child('users/'+auth.uid).exists()",
+        
+        "users": {
+          "$uid": {
+            ".read": "$uid === auth.uid",
+            ".write": "$uid === auth.uid"
+          }
+        }
+      }
+    }
+  }
+}
