@@ -2,23 +2,34 @@ const functions = require('firebase-functions')
 
 exports.matchmaker =
   functions.database.ref('/waiting/{uid}')
-  .onCreate(({ ref }, { params: { uid } }) => {
+  .onWrite(({ after }, { params: { uid } }) => {
+    if (!after.exists()) return Promise.resolve()
+
+    const waiting = after.val()
+    const { ref } = after
     let matchedUid
 
     const matchUser = ref.root.child('match')
     .transaction(match => {
+        // console.log({ waiting, match, uid })
+        if (!waiting && (!match || match.uid === uid)) return {}
         if (!match) return { uid }
+
         matchedUid = match.uid
         return {}
+        
       }, (error, committed, snapshot) => {
         if (error) throw error
+        // console.log({ error, committed, snapshot: snapshot.val() })
         return { committed, snapshot }
       }, false)
     .then(({ committed, snapshot }) => {
       if (!committed) return Promise.resolve()
 
-      const after = snapshot.val()
-      if (after && after.uid) return Promise.resolve()
+      const result = snapshot.val()
+      
+      if (!waiting) return Promise.resolve()
+      if (result && result.uid) return Promise.resolve()
 
       const conversationRef = ref.root.child('conversations').push()
       const users = [ matchedUid, uid ]

@@ -3,63 +3,61 @@ import { UserContext } from '../User'
 import { FirebaseContext } from '../Firebase'
 
 
-const useConversation = (conversationRef) => {
-
-  const [ conversation, setConversation ] = useState()
-
-  useEffect(() => {
-    const conversationListener = 
-      conversationRef.on('value', snapshot => {
-        const conversation = snapshot.val()
-        setConversation(conversation)
-      })
-
-    return () => conversationRef.off(conversationListener)
-  }, [])
-
-  return conversation
-}
-
-
 function Conversation () {
 
   const user = useContext(UserContext)
   const firebase = useContext(FirebaseContext)
-  const conversationRef = firebase.db.ref(`conversations/${user.conversationId}`)
   
-  const [ input, setInput ] = useState('')
-  const conversation = useConversation(conversationRef)
 
+  const [ conversation, setConversation ] = useState()
+
+  useEffect(() => {
+    firebase.suscribeToConversationChange(setConversation, user)
+  }, [])
+
+
+  const [ input, setInput ] = useState('')
 
   useEffect(() => {
     if (!conversation) return
     
     if (!conversation.users[user.uid].typing) {
-      console.log('timer true')
-      conversationRef.child(`users/${user.uid}`).update({ typing: true })
+      firebase.conversationRef.child(`users/${user.uid}`)
+      .update({ typing: true })
     }
     const timeoutId = window.setTimeout(() => {
-      console.log('timer false')
-      conversationRef.child(`users/${user.uid}`).update({ typing: false })
+      firebase.conversationRef.child(`users/${user.uid}`)
+      .update({ typing: false })
     }, 2000)
 
     return () => window.clearTimeout(timeoutId)
   }, [input])
 
+
   const handleSubmit = e => {
     e.preventDefault()
     if (!input) return
-
-    conversationRef.child('messages').push({
+    
+    firebase.conversationRef.child('messages')
+    .push({
       value: input,
       user: user.uid
     })
+    firebase.conversationRef.child(`users/${user.uid}`)
+    .update({ typing: false })
+
     setInput('')
+  }
+
+  const handleLeave = () => {
+    firebase.leaveConversation(undefined, user)
   }
 
   return (
     <div>
       <h2>Conversation</h2>
+
+      <button onClick={handleLeave}>Leave</button>
 
       <form onSubmit={handleSubmit} >
         <input

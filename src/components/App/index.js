@@ -14,6 +14,8 @@ class App extends Component {
     firebase.joinWaitingRoom()
   }
 
+  leave = () => this.props.firebase.leaveWaitingRoom()
+
   render() {
     const { user } = this.props
     return (
@@ -23,7 +25,10 @@ class App extends Component {
         {user.conversationId
           ? <Conversation />
           : user.waiting
-            ? <span>Looking for someone…</span>
+            ? <div>
+                Looking for someone…
+                <button onClick={this.leave}>Leave</button>
+              </div>
             : <button onClick={this.join}>
                 {user.uid ? 'Enter' : 'Join'}
               </button>

@@ -21,8 +21,21 @@ class Firebase {
   createUser = () => this.auth.signInAnonymously()
 
   joinWaitingRoom = () => {
-    this.userRef.set({ waiting: true })
-    this.waitingRef.push(true)
+    this.userRef.update({ waiting: true })
+    this.waitingRef.set(true)
+
+    this.leaveWaitingRoom('onDisconnect')
+  }
+
+  leaveWaitingRoom = (on = 'child') => {
+    this.userRef[on]('/').update({ waiting: false }, () => {
+      on !== 'onDisconnect' && this.userRef.onDisconnect().cancel()
+    })
+    
+    this.waitingRef[on]('/').set(false, () => {
+      on !== 'onDisconnect' && this.waitingRef.onDisconnect().cancel()
+    })
+
   }
 
   onUserChange = callback => {
@@ -35,10 +48,51 @@ class Firebase {
 
       this.userRef.on('value', snapshot => {
         const userInfo = snapshot.val()
-
+        
         const user = { uid: authUser.uid, ...userInfo }
         callback(user)
       })
+    })
+  }
+
+  suscribeToConversationChange = (callback, user) => {
+
+    this.conversationRef = this.db.ref(`conversations/${user.conversationId}`)
+
+    this.conversationListener =
+      this.conversationRef.on('value', snapshot => {
+        const conversation = snapshot.val()
+        callback(conversation)
+      })
+
+    this.leaveConversation('onDisconnect', user)
+  }
+
+  unsuscribeToConversationChange = () => {
+    this.conversationRef.off('value', this.conversationListener)
+    this.conversationRef = null
+  }
+  
+  leaveConversation = (on = 'child', user) => {
+
+    this.conversationRef.child(`users/${user.uid}`)[on]('/')
+    .update({
+      left: true
+    }, () => {
+      on !== 'onDisconnect' && this.conversationRef.child(`users/${user.uid}`).onDisconnect().cancel()
+      on !== 'onDisconnect' && this.unsuscribeToConversationChange()
+    })
+
+    const key = this.userRef.child('previousConversationsIds').push().key
+
+    this.userRef[on]('/').update({
+      conversationId: false,
+      previousConversationsIds: {
+        ...user.previousConversationsIds,
+        [key]: user.conversationId
+      }
+    }, () => {
+      on !== 'onDisconnect' && this.userRef.onDisconnect().cancel()
     })
   }
 
