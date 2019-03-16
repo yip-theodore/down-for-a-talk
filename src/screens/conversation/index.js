@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { UserContext } from '../User'
-import { FirebaseContext } from '../Firebase'
+import UserContext from '../../shared/User'
+import FirebaseContext from '../../shared/Firebase'
 
 
 function Conversation () {
