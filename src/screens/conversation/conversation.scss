@@ -1,0 +1,40 @@
+.Conversation {
+  min-height: 100vh;
+  padding: 100px 10px;
+  position: relative;
+  @media (min-width: 600px) {
+    padding-top: 120px;
+    padding-bottom: 120px;
+  }
+}
+
+.fixed {
+  width: 100%;
+  position: fixed;
+  left: 0;
+  background: var(--background-primary-color);
+  z-index: 1;
+
+  button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    background: none;
+    border: 1px solid var(--background-tertiary-color);
+    &:active:not(:disabled) {
+      border-color: var(--text-secondary-color);
+    }
+    &:disabled {
+      cursor: auto;
+      color: var(--text-secondary-color);
+    }
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

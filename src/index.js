@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 import * as serviceWorker from './serviceWorker';
@@ -13,18 +13,18 @@ import Conversation from './screens/conversation'
 
 
 function AppBase ({ user }) {
-  return (
-    <div>
-      <pre>{JSON.stringify(user, null, 2)}</pre>
 
-      {user.conversationId
-        ? <Conversation />
-        : user.waiting
-          ? <Waiting />
-          : <Home />
-      }
-    </div>
-  )
+  useEffect(() => {
+    const localHour = (new Date()).getHours()
+    if (localHour < 6 || localHour > 20) {
+      document.body.classList.add('--night')
+    }
+  }, [])
+
+
+  if (user.conversationId) return <Conversation />
+  if (user.waiting) return <Waiting />
+  return <Home />
 }
 
 const App = compose(

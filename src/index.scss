@@ -1,16 +1,119 @@
+:root {
+  --font: 'Courier New', Courier, monospace;
+
+  --background-primary-color: #fbfbfb;
+  --background-secondary-color: #f0f0f0;
+  --background-tertiary-color: #ececec;
+  --text-primary-color: #606060;
+  --text-secondary-color: #9b9b9b;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ul,
+ol,
+li,
+p,
+pre,
+blockquote,
+figure,
+hr {
+  margin: 0;
+  padding: 0;
+}
+
+input,
+textarea,
+select,
+button {
+  color: inherit; 
+  font: inherit; 
+  letter-spacing: inherit; 
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  background: var(--background-primary-color);
+  color: var(--text-primary-color);
+  line-height: 1.5;
+  font-family: var(--font);
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #222;
-  color: white;
+
+  &.--night  {
+    --background-primary-color: #111111;
+    --background-secondary-color: #1f1f1f;
+    --background-tertiary-color: #2b2b2b;
+    --text-primary-color: #f0f0f0;
+    --text-secondary-color: #606060;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+#root {
+  height: 100%;
+}
+
+.container {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  margin: 0 auto;
+
+  p {
+    white-space: pre-wrap;
+    margin: 40px 0;
+    &::after {
+      content: '_';
+      animation: blink 1s step-end infinite;
+    }
+  }
+  button {
+    font-family: var(--font);
+    color: var(--text-primary-color);
+    background: var(--background-secondary-color);
+    padding: 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    font-style: italic;
+    animation: pop 0.2s ease-out forwards;
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

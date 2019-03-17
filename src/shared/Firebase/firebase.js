@@ -39,8 +39,15 @@ class Firebase {
   }
 
   onUserChange = callback => {
+    const storedUser = JSON.parse(window.localStorage.getItem('down-for-a-talk_user'))
+    if (storedUser) callback(storedUser)
+
     this.auth.onAuthStateChanged(authUser => {
-      if (!authUser) return
+
+      if (!authUser) {
+        window.localStorage.removeItem('down-for-a-talk_user')
+        return callback({})
+      }
 
       this.userRef = this.db.ref(`users/${authUser.uid}`)
       this.waitingRef = this.db.ref(`waiting/${authUser.uid}`)
@@ -48,6 +55,7 @@ class Firebase {
 
       this.userRef.on('value', snapshot => {
         const userInfo = snapshot.val()
+        window.localStorage.setItem('down-for-a-talk_user', JSON.stringify({ uid: authUser.uid }))
         
         const user = { uid: authUser.uid, ...userInfo }
         callback(user)

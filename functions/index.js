@@ -12,8 +12,11 @@ exports.matchmaker =
     const matchUser = ref.root.child('match')
     .transaction(match => {
         // console.log({ waiting, match, uid })
-        if (!waiting && (!match || match.uid === uid)) return {}
-        if (!match) return { uid }
+
+        if (!match || match.uid === uid) {
+          if (!waiting) return
+          return { uid }
+        }
 
         matchedUid = match.uid
         return {}

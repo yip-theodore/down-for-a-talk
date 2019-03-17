@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useRef } from 'react'
 import UserContext from '../../shared/User'
 import FirebaseContext from '../../shared/Firebase'
+
+import Top from './components/top'
+import Main from './components/main'
+import Bottom from './components/bottom'
+import './conversation.scss'
 
 
 function Conversation () {
@@ -10,18 +15,23 @@ function Conversation () {
   
 
   const [ conversation, setConversation ] = useState()
-
   useEffect(() => {
-    firebase.suscribeToConversationChange(setConversation, user)
+    firebase.suscribeToConversationChange(conversation => {
+      setConversation(conversation)
+      window.scrollTo({ top: document.body.scrollHeight + 100, behavior: 'smooth' })
+    }, user)
   }, [])
 
 
   const [ input, setInput ] = useState('')
-
+  const inputRef = useRef()
   useEffect(() => {
     if (!conversation) return
     
+    inputRef.current.style.height = input ? `${inputRef.current.scrollHeight + 2}px` : ''
+    
     if (!conversation.users[user.uid].typing) {
+      if (!input) return
       firebase.conversationRef.child(`users/${user.uid}`)
       .update({ typing: true })
     }
@@ -34,6 +44,9 @@ function Conversation () {
   }, [input])
 
 
+  const handleChange = e => {
+    setInput(e.target.value)
+  }
   const handleSubmit = e => {
     e.preventDefault()
     if (!input) return
@@ -48,27 +61,40 @@ function Conversation () {
 
     setInput('')
   }
-
+  const handleTextareaEnter = e => {
+    if (e.key === 'Enter' && e.shiftKey === false) {
+      handleSubmit(e)
+    }
+  }
   const handleLeave = () => {
     firebase.leaveConversation(undefined, user)
   }
 
+  if (!conversation) return null
+  
+  const messages = Object.entries(conversation.messages || {})
+  const otherUid = Object.keys(conversation.users).filter(uid => uid !== user.uid)
+  
   return (
-    <div>
-      <h2>Conversation</h2>
+    <div className='Conversation container'>
 
-      <button onClick={handleLeave}>Leave</button>
+      <Top handleLeave={handleLeave} />
 
-      <form onSubmit={handleSubmit} >
-        <input
-          type='text'
-          value={input}
-          onChange={e => setInput(e.target.value)}
-        />
-        <button type='submit'>Send</button>
-      </form>
+      <Main
+        messages={messages}
+        user={user}
+        otherUser={conversation.users[otherUid]}
+      />
 
-      <pre>{JSON.stringify(conversation, null, 2)}</pre>
+      <Bottom
+          input={input}
+          handleChange={handleChange}
+          handleTextareaEnter={handleTextareaEnter}
+          handleSubmit={handleSubmit}
+          inputRef={inputRef}
+          disabled={conversation.users[otherUid].left}
+      />
+
     </div>
   )
 }
